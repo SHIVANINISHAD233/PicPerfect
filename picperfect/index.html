@@ -1,0 +1,116 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Editor</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Linking external CSS -->
+</head>
+<body>
+    <div class="editor">
+        <h1>Photo Editor</h1>
+        <form>
+            <div>
+                <label for="upload-image">Upload Image:</label>
+                <input type="file" id="upload-image" accept="image/*">
+            </div>
+            <div class="filters">
+                <div class="filter-option">
+                    <label for="brightness">Brightness:</label>
+                    <select id="brightness" name="brightness">
+                        <option value="100%">Normal</option>
+                        <option value="75%">Dim</option>
+                        <option value="125%">Bright</option>
+                        <option value="150%">Very Bright</option>
+                    </select>
+                </div>
+                <div class="filter-option">
+                    <label for="contrast">Contrast:</label>
+                    <select id="contrast" name="contrast">
+                        <option value="100%">Normal</option>
+                        <option value="75%">Low</option>
+                        <option value="125%">High</option>
+                        <option value="150%">Very High</option>
+                    </select>
+                </div>
+                <div class="filter-option">
+                    <label for="grayscale">Grayscale:</label>
+                    <select id="grayscale" name="grayscale">
+                        <option value="0%">Off</option>
+                        <option value="100%">On</option>
+                    </select>
+                </div>
+                <div class="filter-option">
+                    <label for="sepia">Sepia:</label>
+                    <select id="sepia" name="sepia">
+                        <option value="0%">Off</option>
+                        <option value="50%">Mild</option>
+                        <option value="100%">Full</option>
+                    </select>
+                </div>
+            </div>
+            <div class="image-container">
+                <img id="filtered-image" src="" alt="Filtered image preview">
+            </div>
+            <button type="button" class="download-btn" id="download-btn">Download Image</button>
+        </form>
+    </div>
+
+    <script>
+        const uploadInput = document.getElementById('upload-image');
+        const filteredImage = document.getElementById('filtered-image');
+        const filters = document.querySelectorAll('select');
+        const downloadButton = document.getElementById('download-btn');
+
+        // Handle image upload
+        uploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    filteredImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Apply filters
+        filters.forEach(filter => {
+            filter.addEventListener('change', () => {
+                const brightness = document.getElementById('brightness').value;
+                const contrast = document.getElementById('contrast').value;
+                const grayscale = document.getElementById('grayscale').value;
+                const sepia = document.getElementById('sepia').value;
+
+                filteredImage.style.filter = `
+                    brightness(${brightness}) 
+                    contrast(${contrast}) 
+                    grayscale(${grayscale}) 
+                    sepia(${sepia})
+                `;
+            });
+        });
+
+        // Handle image download
+        downloadButton.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const image = filteredImage;
+
+            // Set canvas size to match the image
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+
+            // Apply the current filter styles to the canvas
+            context.filter = getComputedStyle(image).filter;
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            // Create a download link
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    </script>
+</body>
+</html>
